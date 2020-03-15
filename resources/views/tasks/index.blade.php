@@ -9,7 +9,7 @@
                 </div>
                 @foreach($tasks as $task)
                 <div class="card">
-                    <div class="card-header">{{$task->title}}</div>
+                    <div class="card-header"><a href="/tasks/{{$task->id}}">{{$task->title}}</a></div>
 
                     <div class="card-body">
                         {{$task->description}}

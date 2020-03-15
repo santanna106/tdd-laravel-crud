@@ -4,9 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Task;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class TaskController extends Controller
 {
+
+    public function __construct(){
+        $this->middleware('auth')->except(['index','show']);
+    }
     /**
      * Display a listing of the resource.
      *
@@ -15,7 +20,7 @@ class TaskController extends Controller
     public function index()
     {
         $tasks = Task::latest()->get();
-        return view('tasks.index',compact('tasks'));
+        return view('tasks.index', compact('tasks'));
     }
 
     /**
@@ -25,7 +30,7 @@ class TaskController extends Controller
      */
     public function create()
     {
-        //
+        return view('tasks.create');
     }
 
     /**
@@ -36,7 +41,18 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'title' => 'required',
+            'description' => 'required'
+        ]);
+
+        $task = Task::create([
+            'title' => $request->get('title'),
+            'description' => $request->get('description'),
+            'user_id' => Auth::id()
+        ]);
+
+        return redirect('/tasks/' . $task->id);
     }
 
     /**
@@ -47,7 +63,7 @@ class TaskController extends Controller
      */
     public function show(Task $task)
     {
-        return view('tasks.show',compact('task'));
+        return view('tasks.show', compact('task'));
     }
 
     /**
@@ -58,7 +74,7 @@ class TaskController extends Controller
      */
     public function edit(Task $task)
     {
-        //
+        return view('tasks.edit',compact('task'));
     }
 
     /**
@@ -70,7 +86,10 @@ class TaskController extends Controller
      */
     public function update(Request $request, Task $task)
     {
-        //
+        $this->authorize('update', $task);
+
+        $task->update($request->all());
+        return redirect('/tasks/'.$task->id);
     }
 
     /**
@@ -81,6 +100,10 @@ class TaskController extends Controller
      */
     public function destroy(Task $task)
     {
-        //
+        $this->authorize('update', $task);
+
+        $task->delete();
+    
+        return redirect("/tasks");
     }
 }
